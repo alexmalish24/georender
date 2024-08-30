@@ -81,6 +81,7 @@ nav:
     - Report Issues: https://github.com/alexmalish24/georender/issues
     - Examples:
         - examples/intro.ipynb
+        - examples/demo.ipynb
     - API Reference:
           - georender module: georender.md
           - common module: common.md
