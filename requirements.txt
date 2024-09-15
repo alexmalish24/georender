@@ -1,2 +1,3 @@
 numpy
 ipyleaflet
+JUPYTER_PLATFORM_DIRS=1
