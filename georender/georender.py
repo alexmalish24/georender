@@ -39,18 +39,13 @@ class Map(ipyleaflet.Map):
         layer = ipyleaflet.GeoJSON(data = data, name = name, **kwargs)
         self.add(layer)
 
-    def add_shp(self, data, name = 'shp', **kwargs):
-
-        import geopandas as gpd
+    def add_shp(self, data, name="shp", **kwargs):
+       
+        import shapefile
+        import json
 
         if isinstance(data, str):
-            data = gpd.read_file(data)
+            with shapefile.Reader(data) as shp:
+                data = shp.__geo_interface__
 
-        if 'style' not in kwargs:
-            kwargs['style'] = {"color": "blue", "weight": 1, "fillColor": "blue", "fillOpacity": 0}
-
-        if 'hover_style' not in kwargs:
-            kwargs['hover_style'] = {"fillColor": "blue", "fillOpacity": 0.8}
-
-        layer = ipyleaflet.GeoData(geo_dataframe = data, name = name, **kwargs)
-        self.add(layer)
+        self.add_geojson(data, name, **kwargs)
