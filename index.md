@@ -4,7 +4,7 @@
 [![image](https://img.shields.io/pypi/v/georender.svg)](https://pypi.python.org/pypi/georender)
 
 
-**A python package for rendering 3D model**
+**A python package for geospatial**
 
 
 -   Free software: MIT License
@@ -13,4 +13,6 @@
 
 ## Features
 
--   TODO
+-   Visualizing vector and raster data
+-   Analyzing vector and raster data
+-   print the message
