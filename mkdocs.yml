@@ -1,5 +1,5 @@
 site_name: georender
-site_description: A python package for rendering 3D model
+site_description: A python package for geospatial
 site_author: alexmalish24
 site_url: https://alexmalish24.github.io/georender
 repo_url: https://github.com/alexmalish24/georender
