@@ -11,13 +11,19 @@ class Map(ipyleaflet.Map):
     """    
       
     def __init__(self, center = [20, 0], zoom = 2, **kwargs):
-        super().__init__(center = center, zoom = zoom, **kwargs)
-    """This is the constructor of the class. It initializes the map with the center and zoom parameters.
+        """
+        This is the constructor of the class. It initializes the map with the center and zoom parameters.
     
-    Ards:
-        center (list, optional): The center of the map. Defaults to [20, 0].
-        zoom (int, optional): The zoom of the map. Defaults to 2.
-    """   
+        Ards:
+            center (list, optional): The center of the map. Defaults to [20, 0].
+            zoom (int, optional): The zoom of the map. Defaults to 2.
+        """
+
+        if "scroll_wheel_zoom" not in kwargs:
+            kwargs["scroll_wheel_zoom"] = True
+
+        super().__init__(center = center, zoom = zoom, **kwargs)
+       
     def add_tile_layer(self, url, name, **kwargs):
         layer = ipyleaflet.TileLayer(url = url, name = name, **kwargs)
         self.add(layer)
@@ -92,25 +98,37 @@ class Map(ipyleaflet.Map):
 
         self.add_geojson(data, name, **kwargs)
 
-    def add_raster(self, data, name = 'raster', **kwargs):
+    def add_image(self, url, bounds, name = 'image', **kwargs):
+        """
+        Adds an image overlay to the map.
+
+        Args:
+            url (str): The URL of the image.
+            bounds (list): The bounds of the image as [[lat1, lon1], [lat2, lon2]].
+            name (str, optional): The name of the image overlay. Defaults to 'image'.
+        """
+        layer = ipyleaflet.ImageOverlay(url = url, bounds = bounds, name = name, **kwargs)
+        self.add(layer)
+
+    def add_raster(self, data, name = 'raster', zoom_to_layer = True, **kwargs):
         """
         Adds a raster layer to the map.
 
         Args:
             data (str): The path to the raster file.
-            name (str, optional): The name of the layer. Defaults to 'raster'.
+            name (str, optional): The name of the raster layer. Defaults to 'raster'.
         """
-        if isinstance(data, str):
-            with rasterio.open(data) as src:
-                data = src.read(1)
-                data = np.ma.masked_equal(data, src.nodata)
-                bounds = src.bounds
-                data = data.filled(0)
-        
-        if "colormap" not in kwargs:
-            kwargs["colormap"] = ipyleaflet.linearColorMap(
-                colors=["red", "blue", "red"], vmin=0, vmax=255
-            )
 
-        layer = ipyleaflet.ImageOverlay(url=data, bounds=bounds, name=name, **kwargs)
+        try:
+            from localtileserver import TileClient, get_leaflet_tile_layer
+        
+        except ImportError:
+            raise ImportError("Please install the localtileserver package to use this feature.")
+
+        client = TileClient(data)
+        layer = get_leaflet_tile_layer(client, name=name, **kwargs)
         self.add(layer) 
+
+        if zoom_to_layer:
+            self.center = client.center()
+            self.zoom = client.default_zoom   
