@@ -2,6 +2,7 @@
 
 import ipyleaflet
 from ipyleaflet import basemaps
+import ipywidgets as widgets
 
 class Map(ipyleaflet.Map):
     """This is the map class that inherits from ipyleaflet.Map. It has the same parameters as ipyleaflet.Map.
@@ -131,4 +132,84 @@ class Map(ipyleaflet.Map):
 
         if zoom_to_layer:
             self.center = client.center()
-            self.zoom = client.default_zoom   
+            self.zoom = client.default_zoom
+    
+    def add_zoom_slider( 
+        self, description="Zoom level", min=0, max=24, value=10, position="topright"
+    ):
+        """Adds a zoom slider to the map.
+
+        Args:
+            position (str, optional): The position of the zoom slider. Defaults to "topright".
+        """
+        zoom_slider = widgets.IntSlider(
+            description=description, min=min, max=max, value=value
+        )
+
+        control = ipyleaflet.WidgetControl(widget=zoom_slider, position=position)
+        self.add(control)
+        widgets.jslink((zoom_slider, "value"), (self, "zoom"))
+
+    def add_widget(self, widget, position="topright"):
+        """Adds a widget to the map.
+
+        Args:
+            widget (object): The widget to be added.
+            position (str, optional): The position of the widget. Defaults to "topright".
+        """
+        control = ipyleaflet.WidgetControl(widget=widget, position=position)
+        self.add(control)
+
+    def add_opacity_slider(
+        self, layer_index=-1, description="Opacity", position="topright"
+    ):
+        """Adds an opacity slider to the map.
+
+        Args:
+            layer (object): The layer to which the opacity slider is added.
+            description (str, optional): The description of the opacity slider. Defaults to "Opacity".
+            position (str, optional): The position of the opacity slider. Defaults to "topright".
+        """
+        layer = self.layers[layer_index]
+        opacity_slider = widgets.FloatSlider(
+            description=description,
+            min=0,
+            max=1,
+            value=layer.opacity,
+            style={"description_width": "initial"},
+        )
+
+        def update_opacity(change):
+            layer.opacity = change["new"]
+
+        opacity_slider.observe(update_opacity, "value")
+
+        control = ipyleaflet.WidgetControl(widget=opacity_slider, position=position)
+        self.add(control)
+
+    def add_basemap_gui(self, basemaps=None, position="topright"):
+        """Adds a basemap GUI to the map.
+
+        Args:
+            position (str, optional): The position of the basemap GUI. Defaults to "topright".
+        """
+
+        basemap_selector = widgets.Dropdown(
+            options=[
+                "OpenStreetMap",
+                "OpenTopoMap",
+                "Esri.WorldImagery",
+                "Esri.NatGeoWorldMap",
+                "CartoDB.Positron",
+                "CartoDB.DarkMatter",
+            ],
+            description="Basemap",
+        )
+
+        def update_basemap(change):
+            self.add_basemap(change["new"])
+
+        basemap_selector.observe(update_basemap, "value")
+
+        control = ipyleaflet.WidgetControl(widget=basemap_selector, position=position)
+        self.add(control)
